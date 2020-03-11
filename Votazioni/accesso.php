@@ -1,4 +1,4 @@
-<?php
+php
 	session_start();
 ?>
 <html>
@@ -71,7 +71,7 @@
         $CF=$_POST['CF'];
         $table=mysqli_query($db, "SELECT email
                                   FROM Utente
-                                  WHERE CF='$CF'"); 
+                                  WHERE CF='$CF'");  
         $row = mysqli_fetch_array($table, MYSQLI_ASSOC); 
         if($row!==NULL)
           {
@@ -81,8 +81,11 @@
           $headers='From: ProjectWork5AInoreply @ company . com';
           mail($to_email,$subject,$message,$headers);
           $_SESSION["CF"]=$CF;
+          echo "<script type='text/javascript'>alert('Email inviata con successo');</script>"; 
           }
+         else
+           echo "<script type='text/javascript'>alert('Il CF inserito non risulta associato a nessun account');</script>"; 
         }
     ?>
   </body>
-</html>
+</html>

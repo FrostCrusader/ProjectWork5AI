@@ -28,12 +28,12 @@
               Votazioni
             </a>
             <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-              <a class="dropdown-item" href="#">Votazioni disponibili</a>
-              <a class="dropdown-item" href="#">Votazioni concluse</a>
-              <a class="dropdown-item" href="#">Votazioni in corso</a>
+              <a class="dropdown-item" href="#" onclick="showLink('links','availableVot')">Votazioni disponibili</a>
+              <a class="dropdown-item" href="#" onclick="showLink('links','endedVot')">Votazioni concluse</a>
+              <a class="dropdown-item" href="#" onclick="showLink('links','currentVot')">Votazioni in corso</a>
               <div class="utente">
                   <div class="dropdown-divider"></div>
-                  <a class="dropdown-item" href="#">Vuoi proporre una votazione?</a>
+                  <a class="dropdown-item" href="#" onclick="showLink('links','proposeVot')">Vuoi proporre una votazione?</a>
               </div>
               <div class="amministratore">
               	<div class="dropdown-divider"></div>
@@ -47,6 +47,11 @@
         </ul>
       </div>
     </nav>
+    <br><br><br>
+    <p class="links" id="proposeVot">Ora propongo una votazione eh!</p>
+    <p class="links" id="availableVot">Votazioni disponibili</p>
+    <p class="links" id="endedVot">Votazioni concluse</p>
+    <p class="links" id="currentVot">Votazioni in corso</p>
     <?php
     	if(isset($_SESSION["credenziali"]))
         	{
@@ -74,8 +79,6 @@
         	  ?><script>hidShow('none', 'block');</script><?php
               }			
             }
-	   else
-            header("Location:accesso.php");
     ?>                    
   </body>
-</html>
+</html>
