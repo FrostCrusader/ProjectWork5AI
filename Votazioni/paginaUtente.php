@@ -9,8 +9,9 @@
     <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
     <script type="text/javascript" src="js/scripts.js"></script>
-    <script type="text/javascript" src="js/jqueries.js"></script>
+    <script type="text/javascript" src="js/jqueries.js"></script>   
   	<link rel="stylesheet" type="text/css" href="css/paginaUtente.css"/>
     <link rel="stylesheet" type="text/css" href="css/accesso.css"/>
   </head>
@@ -41,12 +42,12 @@
               <div class="amministratore">
               	<div class="dropdown-divider"></div>
               	<a class="dropdown-item" href="#" onclick="showLink('links','createVot')">Crea votazione</a>
-                <a class="dropdown-item"  href="#" onclick="openForm()">Invita nuovo utente</a>   
+                <a id="openInvite" class="dropdown-item"  href="#">Invita nuovo utente</a>   
               </div>
             </div>
           </li>
           <li class="nav-item active amministratore">
-            <a class="nav-link" href="#">Utenti</a>
+            <a class="nav-link" href="#" onclick="showLink('links','showUser')">Utenti</a>
           </li>
         </ul>
       </div>
@@ -55,7 +56,7 @@
 
     <!--Form che permette di inserire i dati relativi alla creazione di una votazione-->
     <div class="links text-center exactCenter" id="createVot">
-        <form method="POST" action="#">
+        <form method="POST" action="paginaUtentePHP.php">
             <div class="form-group">
               <label for="Titolo">Titolo:</label>
               <input type="text" class="form-control" id="Titolo" name="titolo" required>
@@ -83,7 +84,7 @@
             </div>
             <div class="form-group">
               <label for="Opzioni">Opzioni:</label>
-              <input type="text" class="form-control" id="Opzioni" name="opzioni" placeholder="opzione1;opzione2;...;" required>
+              <textarea class="form-control" id="Opzioni" name="opzioni" rows="3" placeholder="opzione1;&#x0a;opzione2;&#x0a;...;" required></textarea>  
             </div>
             <div class="custom-control custom-checkbox">
               <input type="checkbox" class="custom-control-input" id="astensione_" name="astensione" value="true">
@@ -97,25 +98,188 @@
             <input class="btn btn-info" type="submit" name="votCreation" value="Crea votazione">
         </form>  
     </div>
+    
+    <!--Parte in cui viene creata la tabella con le votazioni disponibili a cui si puó partecipare-->
+    <!--WORK IN PROGRESS-->
+    <div class="links" id="availableVot">
+        <input type="text" class="form-control searchInput" placeholder="Search for names..">
+        <?php
+          require_once("commonFunctions.php");
+          $credenziali=$_SESSION["credenziali"];
+          $CF=$credenziali["CF"];
+          $codice=user_code($db, $CF);
+          $votazioniT=$votazioniT=votQuery($db, $codice, 1, 0);
+
+          if($votazioniT!==NULL)
+            {?>
+            <div style="overflow-x:auto;">
+                <table class="table-info votTable">
+                    <thead>
+                      <tr class="header">
+                            <th onclick="sortTable(0,0)">Titolo <img src="css/arrows.png"></th>
+                            <th onclick="sortTable(1,0)">Scadenza <img src="css/arrows.png"></th>
+                            <th onclick="sortTable(2,0)">Percentuale minima <img src="css/arrows.png"></th>
+                            <th>Partecipa</th>
+                      </tr>
+                    </thead>
+                    <tbody class="searchTable">
+                      <?php
+                      for($votazioniR=mysqli_fetch_assoc($votazioniT);$votazioniR!=null;$votazioniR=mysqli_fetch_assoc($votazioniT))
+                            {
+                            ?>
+                            <tr>
+                                <td>
+                                    <?php echo $votazioniR["titolo"];?>
+                                </td>
+                                <td>
+                                    <?php echo $votazioniR["scadenza"];?>
+                                </td>
+                                <td>
+                                    <?php echo $votazioniR["percMinima"];?>
+                                </td>
+                                <td>
+                                    <form method="POST" action="votazione.php">
+                                        <input type="hidden" name="choosenQ" value="<?php echo $votazioniR['testoQ']; ?>"/>
+                                        <input class="btn btn-success" type="submit" name="partecipa" value="Partecipa"/>
+                                    </form>
+                                </td>
+                            </tr>
+                            <?php
+                            }
+                      ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php
+            }
+           else
+            echo "Non sono disponibili nuove votazioni";
+            ?>
+    </div>
 
     <p class="links" id="proposeVot">Ora propongo una votazione eh!</p>
-    <p class="links" id="availableVot">Votazioni disponibili</p>
-    <p class="links" id="endedVot">Votazioni concluse</p>
-    <p class="links" id="currentVot">Votazioni in corso</p>
+
+    <!--Parte in cui viene creata la tabella con le votazioni concluse-->
+    <!--WORK IN PROGRESS-->
+    <div class="links" id="endedVot">
+        <input type="text" class="form-control searchInput" placeholder="Cerca la votazione che ti interessa">
+        <div style="overflow-x:auto;">
+            <table class="table-info votTable">
+                <thead>
+                  <tr class="header">
+                        <th onclick="sortTable(0,1)">Titolo <img src="css/arrows.png"></th>
+                        <th onclick="sortTable(1,1)">Scadenza <img src="css/arrows.png"></th>
+                        <th onclick="sortTable(2,1)">Opzione vincente <img src="css/arrows.png"></th>
+                  </tr>
+                </thead>
+                <tbody class="searchTable">
+                  <tr>
+
+                  <?php
+                      require_once("commonFunctions.php");
+                      ended_current_vot($db, 0);
+                  ?>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="links" id="currentVot">
+        <input type="text" class="form-control searchInput" placeholder="Cerca la votazione che ti interessa">
+        <div style="overflow-x:auto;">
+            <table class="table-info votTable">
+                <thead>
+                  <tr class="header">
+                        <th onclick="sortTable(0,2)">Titolo <img src="css/arrows.png"></th>
+                        <th onclick="sortTable(1,2)">Scadenza <img src="css/arrows.png"></th>
+                        <th onclick="sortTable(2,2)">Opzione che sta vincendo <img src="css/arrows.png"></th>
+                  </tr>
+                </thead>
+                <tbody class="searchTable">
+                     <tr>
+
+                     <?php
+                         require_once("commonFunctions.php");
+                         ended_current_vot($db, 1);
+                     ?>
+
+                </tbody>
+            </table>
+        </div>
+    </div>
+
 
     <!--Form che permette di invitare nuovi utenti tramite l'inserimento del loro indirizzo email-->
     <div class="form-popup" id="myForm">
-        <form action="#" method="POST" class="form-container">
+        <form action="paginaUtentePHP.php" method="POST" class="form-container">
             <p>Inserisci l'email dell'utente che vuoi invitare e gli verrá inviata un'email con tutte le istruzioni per poter partecipare</p>
             <div class="form-group">
               <label for="Email">Email:</label>
               <input type="email" class="form-control" id="Email" name="email" placeholder="Inserisci email" required>
             </div>
             <button type="submit" name="inviaEmail" class="btn">Invia</button>
-            <button type="submit" class="btn cancel" onclick="closeForm()">Chiudi</button>
+            <button type="submit" id="closeInvite" class="btn cancel">Chiudi</button>
         </form>
     </div>    
-      
+    
+    <!--Parte in cui viene creata la tabella con gli utenti-->
+    <div class="links" id="showUser">
+      <input type="text" class="form-control searchInput" placeholder="Cerca l'utente che ti interessa">
+      <?php 
+        require_once("commonFunctions.php");
+
+        $utenteT=mysqli_query($db, "SELECT nome, cognome, email, codice
+                                    FROM Utente
+                                    WHERE cancellato=0 && CF!='$CF'");
+        
+        if($utenteT)
+            {?>
+            <div style="overflow-x:auto;">
+                <table class="table-info votTable">
+                    <thead>
+                        <tr class="header">
+                            <th onclick="sortTable(0,3)">Nome<img src="css/arrows.png"></th>
+                            <th onclick="sortTable(1,3)">Cognome<img src="css/arrows.png"></th>
+                            <th onclick="sortTable(2,3)">Email<img src="css/arrows.png"></th>
+                            <th>Elimina</th>
+                        </tr>
+                    </thead>
+                    <tbody class="searchTable">
+                        <?php
+                        for($utenteR=mysqli_fetch_array(($utenteT), MYSQLI_ASSOC);$utenteR!=null;$utenteR=mysqli_fetch_assoc($utenteT))
+                            {
+                            ?>
+                            <tr>
+                                <td>
+                                    <?php echo $utenteR["nome"];?>
+                                </td>
+                                <td>
+                                    <?php echo $utenteR["cognome"];?>
+                                </td>
+                                <td>
+                                    <?php echo $utenteR["email"];?>
+                                </td>
+                                <td>
+                                    <form method="POST" action="paginaUtentePHP.php">
+                                        <input type="hidden" name="choosenUser" value="<?php echo $utenteR['codice']; ?>"/>
+                                        <input class="btn btn-danger" type="submit" name="eraseAccount" value="Elimina"/>
+                                    </form>
+                                </td>
+                            </tr>
+                            <?php
+                            }
+                            ?>
+                    </tbody>
+                </table>
+            </div>
+            <?php
+            }
+           else
+            echo "no";
+        ?>
+    </div>   
+
     <?php
         require_once("commonFunctions.php");
 
@@ -125,18 +289,18 @@
             $credenziali=$_SESSION["credenziali"];
             $CF=$credenziali["CF"];
             $password=$credenziali["password"];
-            $table=mysqli_query($db, "SELECT nome, cognome
-                            		  FROM Utente
-                           		      WHERE CF='$CF' AND password='$password'"); 
-            $row = mysqli_fetch_array($table, MYSQLI_ASSOC);  
-            $nome=$row['nome'];
-            $cognome=$row['cognome'];
-            echo "<h1 class='col-sm links' style='display:block;'>Benvenuto/a $nome $cognome!";
-            $table2=mysqli_query($db, "SELECT *
-                             		   FROM Utente JOIN Amministratore 
-                                       			   ON Utente.codice=Amministratore.codice AND CF='$CF'"); 
-            $row2=mysqli_fetch_array($table2, MYSQLI_ASSOC);  
-            if($row2!==NULL)
+
+            $utenteT=mysqli_query($db, "SELECT nome, cognome
+                            		    FROM Utente
+                           		        WHERE CF='$CF' AND password='$password'"); 
+
+            $utenteR=mysqli_fetch_array($utenteT, MYSQLI_ASSOC);  
+            $nome=$utenteR['nome'];
+            $cognome=$utenteR['cognome'];
+            echo "<h1 class='col-sm links' style='display:block;'>Benvenuto/a $nome $cognome!</h1>";
+            $adminR=adminQuery($db, $CF); 
+      
+            if($adminR!==NULL)
               {
         	  ?><script>hidShow('block', 'none');</script><?php
               }
@@ -148,66 +312,111 @@
            else
             header("Location:accesso.php");
 
-        /*Codice che permette di inviare l'email d'invito*/
-        if(isset($_POST["inviaEmail"]))
+        /**
+         *Funzione che esegue la query per ottenere il codice dell'utente.
+         *@param db, il database di riferimento.
+         *@param CF, il codice fiscale dell'utente di cui cercare il codice
+         */
+        function user_code($db, $CF)
             {
-            $email=$_POST["email"];
-            $characters= '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-            $codice=substr(str_shuffle($characters),0, 10);
-            $table=mysqli_query($db, "INSERT INTO Utente (codice)
-                                      VALUES ('$codice')");
-            $subject='Invito a ProjectWork5AI';
-            $message="Sei stato invitato a partecipare alla piattaforma di votazioni ProjectWork5AI, inserisci il codice $codice nella pagina di registrazione per poter iniziare a votare!
-                      Il link al sito é il seguente:  https://projectwork5ai.altervista.org/votazioni/home.php";
-            $headers='From: ProjectWork5AInoreply @ company . com';
-            mail($email,$subject,$message,$headers);
-            }
+            $codiceT=mysqli_query($db, "SELECT codice
+                                        FROM utente
+                                        WHERE CF='$CF'");
 
-        /*codice che permette di inserire i dati relativi ad una votazione nel db*/        
-        if(isset($_POST["votCreation"]))
-            {
-            require_once("commonFunctions.php");
-            $titolo=$_POST["titolo"];
-            $testo=$_POST["testo"];
-            $percMin=$_POST["percenMin"];
-            $nOp=$_POST["nOpzioni"];
-            $expDate=$_POST["expireDate"];
-            $opzioni=$_POST["opzioni"];
-            if(isset($_POST["astensione"]))
-                $ast=true;
-               else
-                $ast=false;
-            if(isset($_POST["chiaro"]))
-                $votVisible=true;
-               else
-                $votVisible=false;
-            $credenziali=$_SESSION["credenziali"];
-            $CF=$credenziali["CF"];
-            $codiceT= mysqli_query($db, "SELECT amministratore.codice
-                                         FROM utente JOIN amministratore
-                                                    ON utente.codice=amministratore.codice
-                                         WHERE CF='$CF'");
             $codiceR=mysqli_fetch_array($codiceT);
             $codice=$codiceR[0];
-            mysqli_query($db, "INSERT INTO crea(codice, testoQ)
-                               VALUES('$codice', '$testo')");
+            return $codice;
+            }
 
-            mysqli_query($db, "INSERT INTO quesito(testoQ, data, percMinima, stato, astensione, votoChiaro)
-                               VALUES('$testo', '$expDate', '$percMin', '1', '$ast', '$votVisible')");
+        /**
+         *Funzione che esegue la query per ottenere la tabella delle votazioni secondo determinati parametri.
+         *@param db, il database di riferimento.
+         *@param codice, il codice dell'utente.
+         *@param state, lo stato della votazione(0, conclusa; 1, in corso).
+         *@param present, se si cercano votazioni a cui l'utente era presente o meno(1 se presente, 0 se assente).
+         */
+        function votQuery($db, $codice, $state, $present)
+            {
+            $votazioniT=mysqli_query($db, "SELECT *
+                            		       FROM quesito JOIN partecipa
+                                                        ON partecipa.codice='$codice' AND  
+                                                           quesito.testoQ=partecipa.testoQ AND 
+                                                           presente=$present AND
+                                                           stato=$state");
+            return $votazioniT;
+            }
 
-            for($i=0, $j=0;$i<strlen($opzioni);$i++)
+         /**
+         *Funzione che esegue la query per sapere se l'utente é amministratore o meno.
+         *@param db, il database di riferimento.
+         *@param CF, il codice fiscale dell'utente.
+         */
+        function adminQuery($db, $CF)
+            {
+            $adminT=mysqli_query($db, "SELECT *
+                             		   FROM Utente JOIN Amministratore 
+                                       			   ON Utente.codice=Amministratore.codice AND CF='$CF'"); 
+
+            $adminR=mysqli_fetch_array($adminT, MYSQLI_ASSOC); 
+            return $adminR;
+            }
+
+        /**
+         *Funzione che crea le tabelle delle votazioni concluse e in corso.
+         *@param db, il database di riferimento.
+         *@param state, 0 se deve fare le votazioni concluse, 1 se deve fare quelle in corso.
+         */
+        function ended_current_vot($db, $state)
+            {
+            $credenziali=$_SESSION["credenziali"];
+            $CF=$credenziali["CF"];
+            $adminR=adminQuery($db, $CF); 
+
+            if($adminR!==NULL)
+                $votazioniT=mysqli_query($db, "SELECT *
+                            		            FROM quesito
+                                                WHERE stato=$state");
+               else
                 {
-                if($opzioni{$i}==";")
+                $codice=user_code($db, $CF);
+                $votazioniT=votQuery($db, $codice, $state, 1);
+                }      
+            if($votazioniT)
+                {
+                for($votazioniR=mysqli_fetch_assoc($votazioniT);$votazioniR!=null;$votazioniR=mysqli_fetch_assoc($votazioniT))
                     {
-                    $opzione=substr($opzioni,$j, $i-$j);
-                    mysqli_query($db, "INSERT INTO risposta(testoR, testoQ)
-                                       VALUES('$opzione', '$testo')");                         
-                    $j=$i+1;
+                    $key=$votazioniR['testoQ'];
+
+                    $winningOpT=mysqli_query($db, "SELECT testoR
+                                                   FROM risposta
+                                                   WHERE testoQ='$key' AND votiFavorevoli=(SELECT MAX(votiFavorevoli) AS winningOp
+                                                                                           FROM risposta
+                                                                                           WHERE testoQ='$key')");
+
+                    $winningOpR=mysqli_fetch_array($winningOpT);
+                    $numR=mysqli_num_rows($winningOpT);
+                    echo "<td>".$votazioniR["titolo"]."</td>";
+                    echo "<td>".$votazioniR["scadenza"]."</td>";
+                    if($state==1)
+                        {
+                        if($numR==1)
+                            echo "<td>".$winningOpR[0]."</td>";
+                           else
+                            {
+                            echo"<td><b>Pareggio tra:</b>";
+                            for(;$winningOpR!=NULL;$winningOpR=mysqli_fetch_array($winningOpT))
+                                echo "<br>".$winningOpR[0].";";
+                            echo"</td>";
+                            }
+                        }
+                       else
+                        echo "<td>".$winningOpR["testoR"]."</td>";
+                    echo"</tr>";
                     }
                 }
-            
-                    
+               else
+                echo "Non sono disponibili votazioni in corso";
             }
-    ?>                    
+    ?> 
   </body>
 </html>

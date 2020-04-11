@@ -1,12 +1,20 @@
-$("a.proposeVot").click(function () {
-   /* if ($('p.proposeVot').length)
-        $("p.proposeVot").show();
-    else {
-        $("body").append("<p class='links proposeVot'>Ora propongo una votazione eh!</p>");
-        $("p.proposeVot").show();
-    }*/
-});
+$(document).ready(function () {
+    $("[type='number']").keypress(function (evt) {
+        evt.preventDefault();
+    });
 
-$("[type='number']").keypress(function (evt) {
-    evt.preventDefault();
+    $("#openInvite").click(function () {
+        $("#myForm").show();
+    });
+
+    $("#closeInvite").click(function () {
+        $("#myForm").hide();
+    });
+
+    $(".searchInput").on("keyup", function () {
+        var value = $(this).val().toLowerCase();
+        $(".searchTable tr").filter(function () {
+            $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+        });
+    });
 });
