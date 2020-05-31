@@ -5,15 +5,9 @@ body
 
 h1 
 	{
-  	color: red;
+  	color: black;
     margin-top: 4%;
 	}
-
-    
-.back
-	{
-	background: linear-gradient(315deg, #52a7c1 0%, #b3f6d8 74%); 
-    }
 
 nav
 	{
@@ -25,6 +19,15 @@ nav
     display: none;
     }
 
+.borderGraphic {
+    border: 2px solid black;
+    border-radius: 15px;
+    padding: 1%;
+    box-shadow: 0 0 20px 2px black;
+    margin-left: 1.5vw;
+    margin-right: 1.5vw;
+}
+
 .utente
 	{
     display: block;
@@ -35,11 +38,6 @@ nav
     display: none;
     }
 
-textarea
-    {
-    resize: none;
-    }
-
 td>form 
     {
     margin-top: 5%;
@@ -48,7 +46,7 @@ td>form
 .searchInput {
     background-image: url('searchicon.png'); /* Aggiunge l'icona della lente d'ingrandimento al campo di input */
     background-position: 10px 5px; /* Posiziona l'icona */
-    background-repeat: no-repeat; /* Fa sí che l'immagine non si ripeta */
+    background-repeat: no-repeat; /* Fa sï¿½ che l'immagine non si ripeta */
     width: 100%;
     font-size: 16px; 
     padding: 12px 20px 12px 40px; 
@@ -56,13 +54,14 @@ td>form
     margin-bottom: 10px; 
 }
 
-.votTable
-    {
-    border-collapse: collapse; 
-    width: 100%; 
-    border: 1px solid #ddd; 
-    font-size: 18px; 
-    }
+.votTable {
+    border-collapse: collapse;
+    width: 100%;
+    border: 1px solid #ddd;
+    font-size: 18px;
+    border-radius: 1em;
+    overflow: hidden;
+}
 
 .votTable th, .votTable td 
     {
@@ -80,7 +79,46 @@ td>form
     background-color: #f1f1f1;
     }
 
-th>img  
-    {
+th>img, .activeSliding {
     cursor: pointer;
+}
+
+.tableBack {
+    background: rgb(201,96,47);
+    background: linear-gradient(266deg, rgba(201,96,47,1) 5%, rgba(208,114,13,1) 31%, rgba(233,208,9,1) 98%);
+}
+
+.sliding {
+    display: none;
+    position: absolute;
+    background-color: #ffffff;
+    border-radius: 15px;
+    padding: 1%;
+    right: 5%;
+    width: 20%;
+    overflow-wrap: break-word;
+}
+
+@media (max-width: 960px) {
+    .sliding {
+        width: 40%;
     }
+}
+
+@media (max-width: 720px) {
+    .sliding {
+        width: 40%;
+    }
+}
+
+@media (max-width: 540px) {
+    .sliding {
+        width: 60%;
+    }
+}
+
+@media (max-width: 360px) {
+    .sliding {
+        width: 60%;
+    }
+}

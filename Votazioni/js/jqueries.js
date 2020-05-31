@@ -1,4 +1,12 @@
 $(document).ready(function () {
+
+    $(document).click(function (e) {
+        if ($(e.target).closest(".activeSliding").length > 0) {
+            return false;
+        }
+        $(".sliding").slideUp("slow");
+    });
+
     $("[type='number']").keypress(function (evt) {
         evt.preventDefault();
     });
@@ -15,6 +23,11 @@ $(document).ready(function () {
         var value = $(this).val().toLowerCase();
         $(".searchTable tr").filter(function () {
             $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
-        });
+        }); 
     });
+
+    $(".activeSliding").click(function () {
+        $(this).next(".sliding").slideToggle("slow");
+    });
+
 });
